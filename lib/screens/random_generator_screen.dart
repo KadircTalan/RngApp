@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../custom_app_bar.dart';
 import '../drawer.dart';
 
 class RandomGeneratorScreen extends StatefulWidget {
@@ -24,19 +25,10 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            "Rastgele Sayı Üretici",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: screenWidth * 0.06,
-            ),
-          ),
-        ),
+      appBar: const CustomAppBar(
+        title: "Rastgele Sayı Üretici",
         backgroundColor: Colors.blueAccent,
-        elevation: 0,
+        automaticallyImplyLeading: true,
       ),
       drawer: const CustomDrawer(),
       body: Center(
@@ -76,9 +68,43 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
                     SizedBox(width: screenWidth * 0.02),
                     Text(
                       'ÜRET',
-                      style: TextStyle(fontSize: screenWidth * 0.05,color: Colors.yellow),
+                      style: TextStyle(fontSize: screenWidth * 0.05, color: Colors.yellow),
                     ),
                   ],
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.03),
+              SizedBox(height: screenHeight * 0.03),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                color: Colors.blueGrey.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.tune, color: Colors.blueAccent),
+                          SizedBox(width: 8),
+                          Text(
+                            'Değer Aralığı',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Min: $min   •   Max: $max',
+                        style: const TextStyle(fontSize: 18, color: Colors.black54),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

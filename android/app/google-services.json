@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "350012490066",
+    "project_id": "rngapp-69188",
+    "storage_bucket": "rngapp-69188.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:350012490066:android:ede3c8cfbc140f1d363a8b",
+        "android_client_info": {
+          "package_name": "com.example.rng"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiYsf-9kHBvNqGBRHCs7yS8OHrBJXuw34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:350012490066:android:834d6ebe4da04af9363a8b",
+        "android_client_info": {
+          "package_name": "com.example.rngapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiYsf-9kHBvNqGBRHCs7yS8OHrBJXuw34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

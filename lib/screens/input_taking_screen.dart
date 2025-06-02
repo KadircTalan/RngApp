@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:rng/screens/random_generator_screen.dart";
+import "../custom_app_bar.dart";
+import "../drawer.dart";
 
 class InputTakingScreen extends StatefulWidget {
   const InputTakingScreen({super.key});
@@ -10,13 +12,19 @@ class InputTakingScreen extends StatefulWidget {
 
 class _InputTakingScreenState extends State<InputTakingScreen> {
   int min = 0, max = 0;
-  String? errorMessage; // Hata mesajını tutacak değişken
+  String? errorMessage;
 
   final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const CustomAppBar(
+        title: "Değer Aralığı Seç",
+        backgroundColor: Colors.amber,
+        centerTitle: true,
+      ),
+      drawer: const CustomDrawer(),
       body: Center(
         child: Form(
           key: formKey,
@@ -34,7 +42,7 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
                   labelTextData: "Maksimum değer",
                   onSavedFunction: (val) => max = val,
                 ),
-                if (errorMessage != null) // Hata mesajını göster
+                if (errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
@@ -52,31 +60,24 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
           if (formKey.currentState?.validate() == true) {
             formKey.currentState?.save();
 
-            // max değeri min'den küçükse hata mesajı göster
             if (max < min) {
               setState(() {
                 errorMessage = "Min ve Max değerleri hatalı";
               });
 
-              // 2 saniye sonra hata mesajını kaldır
               Future.delayed(const Duration(seconds: 1), () {
                 setState(() {
                   errorMessage = null;
                 });
               });
-              return; // Hata mesajı sonrası işlem yapılmasın
+              return;
             }
 
-            // Geçerli ise RandomGeneratorScreen'e yönlendir
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) {
-                  return RandomGeneratorScreen(
-                    min: min,
-                    max: max,
-                  );
-                },
-              ),
+            // --- ROUTINGİ DEĞİŞTİRİYORUZ ---
+            Navigator.pushNamed(
+              context,
+              '/random',
+              arguments: {'min': min, 'max': max},
             );
           }
         },
@@ -111,7 +112,7 @@ class MyTextFormWidget extends StatelessWidget {
         if (int.tryParse(value) == null) {
           return "Geçerli bir sayı giriniz";
         }
-        // Negatif işareti sayılmadan basamak uzunluğu kontrol ediliyor
+
         String numericPart = value.replaceAll("-", "");
         if (numericPart.length > 10) {
           return "Değerler maksimum 10 basamaklı olabilir";
