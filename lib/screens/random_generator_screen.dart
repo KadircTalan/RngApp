@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../custom_app_bar.dart';
-import '../drawer.dart';
-import 'package:rng/global_range.dart';  // GlobalRange ekledik
+import '../widgets/custom_app_bar.dart';
+import '../widgets/drawer.dart';
+import 'package:rng/utils/global_range.dart';  // GlobalRange ekledik
 
 class RandomGeneratorScreen extends StatefulWidget {
   // Parametre olarak min ve max almaya gerek kalmadı, çünkü globalden okunacak

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../custom_app_bar.dart';
-import 'package:rng/user_database.dart';
-import 'package:rng/shared_preferences_service.dart';
+import '../widgets/custom_app_bar.dart';
+import 'package:rng/database/user_database.dart';
+import 'package:rng/services/shared_preferences_service.dart';
 
-// Giriş ekranı (LoginScreen) - StatefulWidget, çünkü kullanıcı etkileşimi var.
+// Giriş ekranı (LoginScreen)
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -18,6 +18,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;      // Hata mesajı gösterimi için değişken
   bool _isLoggingIn = false;  // Giriş yapılırken butonu pasif yapar
+
+  // Ekran açılır açılmaz son giriş yapılan e-posta'yı yükle
+  @override
+  void initState() {
+    super.initState();
+    _loadLastEmail();
+  }
+
+  // SharedPreferences'tan son giriş yapılan e-posta'yı oku ve input'a yaz
+  Future<void> _loadLastEmail() async {
+    String? lastEmail = await SharedPreferencesService.getLastEmail();
+    if (lastEmail != null && lastEmail.isNotEmpty) {
+      _emailController.text = lastEmail;
+    }
+  }
 
   // Asenkron giriş fonksiyonu
   Future<void> _login() async {
@@ -46,6 +61,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // SharedPreferences'a kullanıcı bilgisini kaydet (kalıcı oturum vs. için)
         await SharedPreferencesService.saveUser(user);
+
+        // SON GİRİŞ YAPAN E-POSTA'YI KAYDET!
+        await SharedPreferencesService.saveLastEmail(email);
 
         print("Giriş yapan kullanıcı:");
         print(user);

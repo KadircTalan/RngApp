@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/log_in_screen.dart';
-import 'global_range.dart';
+import '../screens/log_in_screen.dart';
+import '../utils/global_range.dart';
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
 

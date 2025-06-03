@@ -33,7 +33,7 @@ class SharedPreferencesService {
     };
   }
 
-  // İstersen logout için kullanıcı verilerini temizleme fonksiyonu da ekleyebilirsin
+  // Kullanıcı verilerini temizleme (logout)
   static Future<void> clearUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
@@ -45,5 +45,18 @@ class SharedPreferencesService {
     await prefs.remove('currentCity');
     await prefs.remove('current_user');
     await prefs.remove('uid');
+    // Dikkat: last_email buradan silinmez!
+  }
+
+  // Son giriş yapılan e-postayı kaydet
+  static Future<void> saveLastEmail(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_email', email);
+  }
+
+  // Son giriş yapılan e-postayı getir
+  static Future<String?> getLastEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('last_email');
   }
 }

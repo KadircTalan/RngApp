@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // Firebase temel paketi importu
 import 'package:firebase_core/firebase_core.dart';
-import 'package:rng/user_database.dart';
+import 'package:rng/database/user_database.dart';
 // Firebase CLI ile otomatik oluşturulan ayar dosyası
 import 'firebase_options.dart';
 // Farklı ekranları import ediyoruz
@@ -10,7 +10,7 @@ import 'package:rng/screens/sign_up_screen.dart';
 import 'package:rng/screens/profile_page.dart';
 import 'package:rng/screens/input_taking_screen.dart';
 import 'package:rng/screens/random_generator_screen.dart';
-import 'package:rng/global_range.dart';  // GlobalRange eklendi
+import 'package:rng/utils/global_range.dart';  // GlobalRange eklendi
 
 // Uygulama giriş noktası, Firebase ve SQLite başlatılıyor.
 Future<void> main() async {

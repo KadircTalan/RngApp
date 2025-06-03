@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
-import "../custom_app_bar.dart";
-import "../drawer.dart";
-import 'package:rng/global_range.dart';  // GlobalRange ekledik
+import "../widgets/custom_app_bar.dart";
+import "../widgets/drawer.dart";
+import 'package:rng/utils/global_range.dart';  // GlobalRange ekledik
 
 // Değer aralığı (min/max) alan ekran
 class InputTakingScreen extends StatefulWidget {

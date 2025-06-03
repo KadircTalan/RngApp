@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rng/base_page.dart'; // Genel şablon sayfa
-import 'package:rng/user_database.dart'; // SQLite işlemleri
+import 'package:rng/widgets/base_page.dart'; // Genel şablon sayfa
+import 'package:rng/database/user_database.dart'; // SQLite işlemleri
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
