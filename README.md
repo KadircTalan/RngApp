@@ -21,7 +21,7 @@ Amaç, hem modern hem geleneksel yaklaşımı birleştirerek hem Firebase hem de
 
 ## Öne Çıkan Özellikler
 
-- **Kullanıcı Girişi:** Firebase Authentication ile güvenli giriş ve kayıt
+- **Kullanıcı Girişi:** Firebase Authentication ile güvenli giriş ve kayıt 
 - **Kullanıcı Verisi:** Giriş yapan kullanıcının bilgileri hem Firebase hem de cihazda saklanır
 - **Aralık Belirleme:** Minimum ve maksimum değer girerek rastgele sayı üretme
 - **Drawer Menü:** Sol üst köşeden açılan menü ile hızlı navigasyon
@@ -46,12 +46,14 @@ Amaç, hem modern hem geleneksel yaklaşımı birleştirerek hem Firebase hem de
    - Kullanıcı e-posta ve şifre ile giriş yapar
    - Son giriş yapan e-posta otomatik gelir
    - Giriş başarılıysa “Değer Aralığı Seçimi” ekranına yönlendirilir
+   - Örnek olarak email:"kadir@example.com" şifre:"rngapp" olan test kullanıcısı vardır.
 
     <img src="assets/login_screen.png" alt="Login Screen" width="220"/>
 
 2. **Kayıt Ol Ekranı (`sign_up_screen.dart`)**
    - Yeni kullanıcılar e-posta, şifre, isim, soyisim, doğum yeri ve şehir ile kayıt olur
    - Bilgiler Firebase’e ve SQLite’a kaydedilir
+   - Eğer **üye olmakta hata alınırsa** dosyanın build klasörünün silinmesi ve emülatörde Settings>Apps>rng>Storage & cache içinde "Clear storage" uygulanması tavsiye edilir.
 
     <img src="assets/signup_screen.png" alt="Sign Up Screen" width="220"/>
 
