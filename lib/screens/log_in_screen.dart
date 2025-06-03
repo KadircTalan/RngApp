@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '/screens/input_taking_screen.dart';
-import '/screens/sign_up_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/custom_app_bar.dart';
+import 'package:rng/database/user_database.dart';
+import 'package:rng/services/shared_preferences_service.dart';
 
+// Giriş ekranı (LoginScreen)
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -11,83 +13,142 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  // Kullanıcıdan e-posta ve şifre almak için controller'lar
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? _errorMessage;
-  bool _isLoggingIn = false;
+  String? _errorMessage;      // Hata mesajı gösterimi için değişken
+  bool _isLoggingIn = false;  // Giriş yapılırken butonu pasif yapar
 
-  // Giriş fonksiyonu
+  // Ekran açılır açılmaz son giriş yapılan e-posta'yı yükle
+  @override
+  void initState() {
+    super.initState();
+    _loadLastEmail();
+  }
+
+  // SharedPreferences'tan son giriş yapılan e-posta'yı oku ve input'a yaz
+  Future<void> _loadLastEmail() async {
+    String? lastEmail = await SharedPreferencesService.getLastEmail();
+    if (lastEmail != null && lastEmail.isNotEmpty) {
+      _emailController.text = lastEmail;
+    }
+  }
+
+  // Asenkron giriş fonksiyonu
   Future<void> _login() async {
     setState(() {
-      _isLoggingIn = true;
-      _errorMessage = null;
+      _isLoggingIn = true;  // "Giriş yapılıyor..." göstergesi için
+      _errorMessage = null; // Önceki hataları temizle
     });
 
-    String username = _usernameController.text;
-    String password = _passwordController.text;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-    bool isValid = await _validateUser(username, password);
-
-    if (isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Giriş Başarılı!'),
-          duration: Duration(seconds: 1),
-        ),
+    try {
+      // Firebase ile giriş işlemi (bulut tarafı)
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => InputTakingScreen()),
+      // Kullanıcıyı yerel veritabanında doğrula (offline/check)
+      Map<String, dynamic>? user = await UserDatabase().validateUser(email, password);
+
+      if (user != null) {
+        // Map'i düzenlenebilir hale getiriyoruz, uid ekliyoruz
+        user = Map<String, dynamic>.from(user);
+        user['uid'] = userCredential.user?.uid;
+
+        // SharedPreferences'a kullanıcı bilgisini kaydet (kalıcı oturum vs. için)
+        await SharedPreferencesService.saveUser(user);
+
+        // SON GİRİŞ YAPAN E-POSTA'YI KAYDET!
+        await SharedPreferencesService.saveLastEmail(email);
+
+        print("Giriş yapan kullanıcı:");
+        print(user);
+
+        // Widget dispose olmuş mu kontrolü, yoksa ekranda hata çıkar.
+        if (!mounted) return;
+
+        // Giriş başarılı uyarısı (Snackbar)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Giriş Başarılı!'),
+            duration: Duration(seconds: 1),
+          ),
         );
-      });
-    } else {
+
+        // Snackbar'ın 1 sn gösterilmesini bekle
+        await Future.delayed(const Duration(seconds: 1));
+
+        if (!mounted) return;
+
+        // Girişten sonra "input" ekranına yönlendir
+        Navigator.pushReplacementNamed(context, '/input');
+      } else {
+        // Eğer kullanıcı veritabanında yoksa hata ver
+        setState(() {
+          _errorMessage = "Kullanıcı yerel veritabanında bulunamadı!";
+          _isLoggingIn = false;
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      // Firebase hatalarını yönet (kullanıcı yok, yanlış şifre vs.)
       setState(() {
-        _errorMessage = "Hatalı kullanıcı adı veya şifre!";
+        if (e.code == 'user-not-found') {
+          _errorMessage = 'Kullanıcı bulunamadı.';
+        } else if (e.code == 'wrong-password') {
+          _errorMessage = 'Yanlış şifre.';
+        } else {
+          _errorMessage = 'Giriş sırasında hata oluştu: ${e.message}';
+        }
+        _isLoggingIn = false;
+      });
+    } catch (e) {
+      // Beklenmeyen başka bir hata varsa...
+      setState(() {
+        _errorMessage = 'Bilinmeyen hata: $e';
         _isLoggingIn = false;
       });
     }
   }
 
-  Future<bool> _validateUser(String username, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedUsername = prefs.getString('username');
-    final savedPassword = prefs.getString('password');
-
-    if (savedUsername == username && savedPassword == password) {
-      return true;
-    }
-    return false;
-  }
-
+  // Ekran tasarımı burada başlar.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Giriş Yap'), automaticallyImplyLeading: false),
+      appBar: const CustomAppBar(
+        title: "Giriş Yap",
+        centerTitle: false,
+        automaticallyImplyLeading: false, // Geri tuşu gözükmesin
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center, // Ortala
           children: [
+            // E-posta girişi
             TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Kullanıcı Adı'),
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'E-posta'),
             ),
             const SizedBox(height: 10),
+            // Şifre girişi
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Şifre'),
-              obscureText: true,
+              obscureText: true, // Şifreyi gizle
             ),
             const SizedBox(height: 20),
-            _errorMessage != null
-                ? Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.red),
-            )
-                : const SizedBox.shrink(),
+            // Hata mesajı varsa göster
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
             const SizedBox(height: 10),
+            // Giriş butonu (yükleniyorsa buton pasif ve loading göster)
             ElevatedButton(
               onPressed: _isLoggingIn ? null : _login,
               child: _isLoggingIn
@@ -95,12 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   : const Text('Giriş Yap'),
             ),
             const SizedBox(height: 20),
+            // Kayıt olma yönlendirmesi
             TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                );
+                Navigator.pushNamed(context, '/signup');
               },
               child: const Text(
                 'Henüz üye değil misiniz? Kayıt Olun',

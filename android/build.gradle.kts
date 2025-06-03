@@ -19,3 +19,9 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+// ...
+plugins {
+    // Buraya diğer pluginler (varsa) ve Google Services eklentisini **tek seferde** ekle!
+    id("com.google.gms.google-services") version "4.3.15" apply false
+    // id("başka.bir.plugin") version "x.y.z"
+}
