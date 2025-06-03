@@ -93,12 +93,14 @@ Amaç, hem modern hem geleneksel yaklaşımı birleştirerek hem Firebase hem de
 ## Kullanıcı Oturumu ve Bilgilerin Saklanması
 
 - Kullanıcı giriş bilgileri, güvenli şekilde Firebase Authentication'da saklanır.
-   <img src="assets/firebase_authentication.png" alt="Firebase Authentication" width="220"/>
+
+  ![Firebase Auth](assets/firebase_authentication.png)
 
 - Son giriş yapılan e-posta **SharedPreferences** ile cihazda tutulur ve giriş ekranında otomatik çıkar.
 
 - Kullanıcı profili ve diğer bilgiler hem Firebase Firestore’da hem de cihazda (SQLite) saklanır.
-   <img src="assets/firestore.png" alt="Firebase Firestore" width="220"/>
+
+  ![Firestore](assets/firestore.png)
 
 ---
 
