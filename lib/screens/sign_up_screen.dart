@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rng/custom_app_bar.dart';
 import 'package:rng/user_database.dart';
 
+// Kayıt ekranı
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
 
@@ -13,12 +14,14 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  // Text controller'lar: Kullanıcıdan gelen veriyi almak için
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _surnameController = TextEditingController();
 
+  // Seçimli alanlar
   String? _selectedBirthPlace;
   String? _selectedCurrentCity;
   String? _errorMessage;
@@ -27,10 +30,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   int? selectedMonth;
   int? selectedYear;
 
+  // Günü, ayı, yılı dropdown için listeler
   final List<int> days = List.generate(31, (index) => index + 1);
   final List<int> months = List.generate(12, (index) => index + 1);
   final List<int> years = List.generate(DateTime.now().year - 1900 + 1, (index) => DateTime.now().year - index);
 
+  // İl listesi (klasik Türkiye şehirleri)
   final List<String> _cities = [
     'İstanbul','Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya',
     'Artvin', 'Aydın', 'Balıkesir', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu',
@@ -46,6 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     'Yalova', 'Karabük', 'Kilis', 'Osmaniye', 'Düzce'
   ];
 
+  // Kullanıcı verilerini SharedPreferences'a kaydeden fonksiyon
   Future<void> _saveToSharedPreferences(Map<String, dynamic> user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', user['email'] ?? '');
@@ -61,9 +67,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  // Asıl kayıt işlemi
   Future<void> _signUp() async {
     setState(() => _errorMessage = null);
 
+    // Formdan gelen değerler
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     String confirmPassword = _confirmPasswordController.text.trim();
@@ -72,6 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String? birthPlace = _selectedBirthPlace;
     String? currentCity = _selectedCurrentCity;
 
+    // Boş alan kontrolü
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty ||
         name.isEmpty || surname.isEmpty ||
         selectedDay == null || selectedMonth == null || selectedYear == null ||
@@ -80,19 +89,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
+    // Şifreler eşleşiyor mu kontrolü
     if (password != confirmPassword) {
       setState(() => _errorMessage = "Şifreler eşleşmiyor!");
       return;
     }
 
     try {
+      // Firebase Authentication ile kullanıcı oluşturma
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      // Doğum tarihini formatla
       String birthDate = '${selectedDay.toString().padLeft(2, '0')}-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear.toString()}';
 
+      // Kullanıcı map'i oluştur
       Map<String, dynamic> user = {
         'email': email,
         'password': password,
@@ -101,9 +114,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'birthDate': birthDate,
         'birthPlace': birthPlace,
         'currentCity': currentCity,
-        'uid': userCredential.user?.uid,
+        'uid': userCredential.user?.uid ?? '',
       };
 
+      print("Firebase başarılı, user map:");
+      print(user);
+
+      // Firestore'a kullanıcıyı ekle
       await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
         'email': email,
         'name': name,
@@ -113,9 +130,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'currentCity': currentCity,
       });
 
-      await UserDatabase().insertUser(user);
-      await _saveToSharedPreferences(user);
+      // SQLite'a ekle (try-catch ile hata kontrolü)
+      try {
+        await UserDatabase().insertUser(user);
+        print('SQLite insertUser BAŞARILI!');
+      } catch (e) {
+        print('SQLite insertUser HATASI: $e');
+        setState(() => _errorMessage = "SQLite kaydı başarısız: $e");
+        return;
+      }
 
+      // SharedPreferences'a yaz
+      try {
+        await _saveToSharedPreferences(user);
+        print('SharedPreferences BAŞARILI!');
+      } catch (e) {
+        print('SharedPreferences HATASI: $e');
+      }
+
+      // Kullanıcı başarıyla kayıt olduysa snackbar göster ve login ekranına yönlendir
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -146,6 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _errorMessage = 'Bilinmeyen hata: $e';
       });
+      print("Genel hata: $e");
     }
   }
 
@@ -162,33 +196,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // E-posta alanı
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'E-posta'),
               ),
               const SizedBox(height: 10),
+              // Şifre alanı
               TextField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: 'Şifre'),
                 obscureText: true,
               ),
               const SizedBox(height: 10),
+              // Şifre tekrar alanı
               TextField(
                 controller: _confirmPasswordController,
                 decoration: const InputDecoration(labelText: 'Şifre (Tekrar)'),
                 obscureText: true,
               ),
               const SizedBox(height: 10),
+              // İsim alanı
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'İsim'),
               ),
               const SizedBox(height: 10),
+              // Soyisim alanı
               TextField(
                 controller: _surnameController,
                 decoration: const InputDecoration(labelText: 'Soyisim'),
               ),
               const SizedBox(height: 10),
+              // Doğum günü, ayı, yılı dropdown'ları
               Row(
                 children: [
                   Expanded(
@@ -220,6 +260,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ],
               ),
               const SizedBox(height: 10),
+              // Doğum yeri dropdown'ı
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Doğum Yeri'),
                 value: _selectedBirthPlace,
@@ -236,6 +277,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
               ),
               const SizedBox(height: 10),
+              // Yaşadığı il dropdown'ı
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Yaşadığı İl'),
                 value: _selectedCurrentCity,
@@ -252,17 +294,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
               ),
               const SizedBox(height: 20),
+              // Hata mesajı varsa göster
               if (_errorMessage != null)
                 Text(
                   _errorMessage!,
                   style: const TextStyle(color: Colors.red),
                 ),
               const SizedBox(height: 10),
+              // Kayıt ol butonu
               ElevatedButton(
                 onPressed: _signUp,
                 child: const Text('Kayıt Ol'),
               ),
               const SizedBox(height: 10),
+              // Zaten üye misiniz? Login yönlendirmesi
               TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/login');

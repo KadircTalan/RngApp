@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rng/base_page.dart';
-import 'package:rng/user_database.dart';
+import 'package:rng/base_page.dart'; // Genel şablon sayfa
+import 'package:rng/user_database.dart'; // SQLite işlemleri
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -11,22 +11,25 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Map<String, dynamic>? user;
-  bool loading = true;
+  Map<String, dynamic>? user; // Kullanıcı bilgileri
+  bool loading = true; // Yükleniyor durumu
 
   @override
   void initState() {
     super.initState();
-    _loadUser();
+    _loadUser(); // Sayfa açılır açılmaz kullanıcıyı yükle
   }
 
+  // SharedPreferences'dan email'i al, sonra SQLite'tan kullanıcıyı çek
   Future<void> _loadUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('current_user');  // current_user artık email
+    final email = prefs.getString('current_user');  // current_user olarak email saklanıyor
     print("Giriş yapan kullanıcı: $email");
+
     if (email != null) {
-      final data = await UserDatabase().getUser(email);  // email ile sorgula
+      final data = await UserDatabase().getUser(email);  // Email ile SQLite sorgusu
       print("Bulunan user: $data");
+
       setState(() {
         user = data;
         loading = false;
@@ -44,7 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return BasePage(
       title: 'Profil Sayfası',
       content: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator()) // Yükleniyorsa spinner göster
           : user == null
           ? const Center(
         child: Text(
@@ -63,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                _infoTile(Icons.person, 'E-posta', user!['email']), // Burada userdb’de hala 'username' kullanıyorsan bunu email diye değiştir.
+                _infoTile(Icons.person, 'E-posta', user!['email']), // E-posta bilgisi
                 _infoTile(Icons.badge, 'İsim', user!['name']),
                 _infoTile(Icons.family_restroom, 'Soyisim', user!['surname']),
                 _infoTile(Icons.calendar_today, 'Doğum Tarihi', user!['birthDate']),
@@ -77,6 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // Kullanıcı bilgisi için tek satırlık görsel bileşen
   Widget _infoTile(IconData icon, String label, String value) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),

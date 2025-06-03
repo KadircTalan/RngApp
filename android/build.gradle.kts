@@ -21,9 +21,7 @@ tasks.register<Delete>("clean") {
 }
 // ...
 plugins {
-    // ...
-
-    // Add the dependency for the Google services Gradle plugin
+    // Buraya diğer pluginler (varsa) ve Google Services eklentisini **tek seferde** ekle!
     id("com.google.gms.google-services") version "4.3.15" apply false
-
+    // id("başka.bir.plugin") version "x.y.z"
 }

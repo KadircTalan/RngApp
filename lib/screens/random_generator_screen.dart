@@ -2,25 +2,28 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../custom_app_bar.dart';
 import '../drawer.dart';
+import 'package:rng/global_range.dart';  // GlobalRange ekledik
 
 class RandomGeneratorScreen extends StatefulWidget {
-  final int min, max;
+  // Parametre olarak min ve max almaya gerek kalmadı, çünkü globalden okunacak
 
-  const RandomGeneratorScreen({super.key, required this.min, required this.max});
+  const RandomGeneratorScreen({super.key});
 
   @override
   State<RandomGeneratorScreen> createState() => _RandomGeneratorScreenState();
 }
 
 class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
-  late int min = widget.min;
-  late int max = widget.max;
+  // Global değerlerden alıyoruz
+  late int min = GlobalRange.min;
+  late int max = GlobalRange.max;
 
-  int? _genratedNum;
-  final generateAnum = Random();
+  int? _genratedNum; // Üretilen rastgele sayı
+  final generateAnum = Random(); // Random nesnesi
 
   @override
   Widget build(BuildContext context) {
+    // Ekran ölçüleri responsive için
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -31,12 +34,14 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
         automaticallyImplyLeading: true,
       ),
       drawer: const CustomDrawer(),
+
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Üretilmiş sayı veya başlangıç mesajı gösterimi
               Text(
                 _genratedNum?.toString() ?? "Sayı Üretmek İçin Butona Bas",
                 style: TextStyle(
@@ -46,10 +51,14 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+
               SizedBox(height: screenHeight * 0.05),
+
+              // Sayı üretme butonu
               ElevatedButton(
                 onPressed: () {
                   setState(() {
+                    // Global min-max aralığında random sayı üretimi
                     _genratedNum = min + generateAnum.nextInt(max - min + 1);
                   });
                 },
@@ -73,8 +82,10 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
                   ],
                 ),
               ),
+
               SizedBox(height: screenHeight * 0.03),
-              SizedBox(height: screenHeight * 0.03),
+
+              // Min-Max değerlerinin gösterildiği kart
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -99,6 +110,8 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
+
+                      // Global min ve max değer gösterimi
                       Text(
                         'Min: $min   •   Max: $max',
                         style: const TextStyle(fontSize: 18, color: Colors.black54),
@@ -111,6 +124,7 @@ class _RandomGeneratorScreenState extends State<RandomGeneratorScreen> {
           ),
         ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }

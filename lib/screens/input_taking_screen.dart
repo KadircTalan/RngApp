@@ -1,8 +1,9 @@
 import "package:flutter/material.dart";
-import "package:rng/screens/random_generator_screen.dart";
 import "../custom_app_bar.dart";
 import "../drawer.dart";
+import 'package:rng/global_range.dart';  // GlobalRange ekledik
 
+// Değer aralığı (min/max) alan ekran
 class InputTakingScreen extends StatefulWidget {
   const InputTakingScreen({super.key});
 
@@ -11,10 +12,9 @@ class InputTakingScreen extends StatefulWidget {
 }
 
 class _InputTakingScreenState extends State<InputTakingScreen> {
-  int min = 0, max = 0;
-  String? errorMessage;
+  String? errorMessage; // Hata mesajı için değişken
 
-  final formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>(); // Form için anahtar
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
         backgroundColor: Colors.amber,
         centerTitle: true,
       ),
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(), // Menü çekmecesi
       body: Center(
         child: Form(
           key: formKey,
@@ -33,15 +33,18 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Minimum değer için input alanı
                 MyTextFormWidget(
                   labelTextData: "Minimum değer",
-                  onSavedFunction: (val) => min = val,
+                  onSavedFunction: (val) => GlobalRange.min = val,  // global min değişkenini güncelliyoruz
                 ),
                 const SizedBox(height: 12),
+                // Maksimum değer için input alanı
                 MyTextFormWidget(
                   labelTextData: "Maksimum değer",
-                  onSavedFunction: (val) => max = val,
+                  onSavedFunction: (val) => GlobalRange.max = val,  // global max değişkenini güncelliyoruz
                 ),
+                // Hata mesajı varsa göster
                 if (errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
@@ -57,14 +60,17 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Form validasyonunu kontrol et
           if (formKey.currentState?.validate() == true) {
             formKey.currentState?.save();
 
-            if (max < min) {
+            // Min ve Max değerleri mantık kontrolü
+            if (GlobalRange.max < GlobalRange.min) {
               setState(() {
                 errorMessage = "Min ve Max değerleri hatalı";
               });
 
+              // Hata mesajını 1 saniye sonra temizle
               Future.delayed(const Duration(seconds: 1), () {
                 setState(() {
                   errorMessage = null;
@@ -73,11 +79,11 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
               return;
             }
 
-            // --- ROUTINGİ DEĞİŞTİRİYORUZ ---
+            // Min ve Max değerleri parametre olarak gönderip random sayıya yönlendir
             Navigator.pushNamed(
               context,
               '/random',
-              arguments: {'min': min, 'max': max},
+              arguments: {'min': GlobalRange.min, 'max': GlobalRange.max},  // global değerleri route ile yolluyoruz
             );
           }
         },
@@ -88,9 +94,12 @@ class _InputTakingScreenState extends State<InputTakingScreen> {
   }
 }
 
+/// Tekrar eden TextFormField widget'ı.
+/// Label ve onSaved fonksiyonu parametre olarak veriliyor.
+/// Her yerde ayrı ayrı kod yazmak yerine, tekrar kullanıma uygun yapı.
 class MyTextFormWidget extends StatelessWidget {
-  final String labelTextData;
-  final void Function(int val) onSavedFunction;
+  final String labelTextData;  // Label için yazı
+  final void Function(int val) onSavedFunction; // Değeri kaydeden fonksiyon
 
   const MyTextFormWidget({
     super.key,
@@ -107,20 +116,21 @@ class MyTextFormWidget extends StatelessWidget {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return "Boş bırakılmaz";
+          return "Boş bırakılmaz"; // Boşsa uyarı
         }
         if (int.tryParse(value) == null) {
-          return "Geçerli bir sayı giriniz";
+          return "Geçerli bir sayı giriniz"; // Sayı değilse uyarı
         }
 
+        // Negatif işareti kaldırıp rakam uzunluğunu kontrol et
         String numericPart = value.replaceAll("-", "");
         if (numericPart.length > 10) {
-          return "Değerler maksimum 10 basamaklı olabilir";
+          return "Değerler maksimum 10 basamaklı olabilir"; // Büyük değer uyarısı
         }
         return null;
       },
-      keyboardType: TextInputType.number,
-      onSaved: (newVal) => onSavedFunction(int.parse(newVal!)),
+      keyboardType: TextInputType.number, // Sadece sayı klavyesi gelsin
+      onSaved: (newVal) => onSavedFunction(int.parse(newVal!)), // Değeri dışarıya aktar
     );
   }
 }
